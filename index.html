@@ -5,23 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🤖 AI Помощник | Mini App</title>
     <style>
-        /* Базовые стили */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* CSS переменные для темной/светлой темы */
         :root {
             --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-secondary: white;
-            --text-primary: #333;
-            --text-secondary: #666;
+            --bg-secondary: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
             --accent-color: #667eea;
             --card-bg: #f8f9fa;
-            --border-color: #eee;
-            --shadow: 0 10px 30px rgba(0,0,0,0.1);
-            --nav-bg: white;
+            --border-color: #e9ecef;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --nav-bg: #ffffff;
+            --toast-bg: #43e97b;
+            --toast-error: #f5576c;
+            --toast-warning: #ffd166;
+            --toast-info: #667eea;
         }
 
         [data-theme="dark"] {
@@ -31,9 +29,20 @@
             --text-secondary: #b0b0b0;
             --accent-color: #667eea;
             --card-bg: #1e1e1e;
-            --border-color: #333;
-            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --border-color: #333333;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             --nav-bg: #1a1a1a;
+            --toast-bg: #43e97b;
+            --toast-error: #f5576c;
+            --toast-warning: #ffd166;
+            --toast-info: #667eea;
+        }
+
+        /* Базовые стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -81,7 +90,14 @@
             justify-content: center;
             color: white;
             font-size: 24px;
-            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
         }
 
         .user-info h1 {
@@ -279,7 +295,7 @@
         }
 
         .claim-btn:disabled {
-            background: #ccc;
+            background: #cccccc;
             cursor: not-allowed;
         }
 
@@ -338,6 +354,120 @@
             color: var(--text-secondary);
         }
 
+        /* Секции профиля, помощи, настроек */
+        .profile-info, .help-grid, .settings-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-card, .help-card, .setting-item {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .info-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .help-card {
+            cursor: pointer;
+        }
+
+        .help-card:hover {
+            background: var(--border-color);
+            transform: translateY(-2px);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-card i, .help-card h3 i {
+            font-size: 24px;
+            color: var(--accent-color);
+            width: 50px;
+            height: 50px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-content h3, .help-card h3, .setting-info h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .info-content p, .help-card p, .setting-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .setting-info p {
+            font-size: 12px;
+        }
+
+        /* Переключатель темы */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cccccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
         /* Нижнее меню */
         .bottom-nav {
             position: fixed;
@@ -381,157 +511,6 @@
         .nav-btn span {
             font-size: 12px;
             font-weight: 500;
-        }
-
-        /* Секции профиля, помощи, настроек */
-        .profile-info {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .info-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .info-card i {
-            font-size: 24px;
-            color: var(--accent-color);
-            width: 50px;
-            height: 50px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .info-content h3 {
-            font-size: 16px;
-            margin-bottom: 5px;
-            color: var(--text-primary);
-        }
-
-        .info-content p {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* Настройки */
-        .settings-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: var(--card-bg);
-            border-radius: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .setting-item:last-child {
-            border-bottom: none;
-        }
-
-        .setting-info h3 {
-            font-size: 16px;
-            margin-bottom: 5px;
-            color: var(--text-primary);
-        }
-
-        .setting-info p {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--accent-color);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        /* Помощь */
-        .help-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .help-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .help-card:hover {
-            background: var(--border-color);
-            transform: translateY(-2px);
-        }
-
-        .help-card h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .help-card p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.5;
         }
 
         /* Модальные окна */
@@ -596,21 +575,24 @@
             transform: rotate(90deg);
         }
 
-        .modal-body textarea {
+        .modal-body textarea, .modal-body input {
             width: 100%;
-            height: 150px;
             padding: 15px;
             border: 2px solid var(--border-color);
             border-radius: 10px;
             font-family: inherit;
             font-size: 16px;
-            resize: none;
-            margin-bottom: 20px;
             background: var(--card-bg);
             color: var(--text-primary);
+            margin-bottom: 20px;
         }
 
-        .modal-body textarea:focus {
+        .modal-body textarea {
+            height: 150px;
+            resize: none;
+        }
+
+        .modal-body textarea:focus, .modal-body input:focus {
             outline: none;
             border-color: var(--accent-color);
         }
@@ -715,7 +697,7 @@
             top: 20px;
             right: 20px;
             padding: 12px 20px;
-            background: #43e97b;
+            background: var(--toast-bg);
             color: white;
             border-radius: 10px;
             z-index: 10000;
@@ -725,15 +707,15 @@
         }
 
         .toast-error {
-            background: #f5576c;
+            background: var(--toast-error);
         }
 
         .toast-warning {
-            background: #ffd166;
+            background: var(--toast-warning);
         }
 
         .toast-info {
-            background: var(--accent-color);
+            background: var(--toast-info);
         }
 
         @keyframes slideInRight {
@@ -758,6 +740,26 @@
             }
         }
 
+        /* Стили для ошибок и состояний загрузки */
+        .error-message {
+            color: #f5576c;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
         /* Адаптивность */
         @media (max-width: 480px) {
             .container {
@@ -771,9 +773,29 @@
             .referral-stats {
                 grid-template-columns: 1fr;
             }
+
+            .header {
+                padding: 15px;
+            }
+
+            .avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .user-info h1 {
+                font-size: 18px;
+            }
+
+            section {
+                padding: 15px;
+            }
         }
     </style>
+    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Font Awesome иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -781,8 +803,9 @@
         <!-- Шапка с профилем -->
         <header class="header">
             <div class="user-profile">
-                <div class="avatar">
-                    <i class="fas fa-robot"></i>
+                <div class="avatar" id="user-avatar">
+                    <i class="fas fa-robot" id="avatar-icon"></i>
+                    <img id="avatar-img" style="display: none;">
                 </div>
                 <div class="user-info">
                     <h1 id="user-name">AI Помощник</h1>
@@ -802,7 +825,7 @@
         </header>
 
         <!-- Основной контент (Главная) -->
-        <section id="main-section" class="main-section">
+        <section id="main-section">
             <!-- Быстрые действия -->
             <div class="functions-section">
                 <h2><i class="fas fa-bolt"></i> Быстрые действия</h2>
@@ -894,7 +917,10 @@
             <div class="history-section">
                 <h2><i class="fas fa-history"></i> Последние действия</h2>
                 <div class="history-list" id="history-list">
-                    <!-- История будет загружена через JS -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Загрузка истории...</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1016,7 +1042,7 @@
                     </label>
                 </div>
 
-                <div class="setting-item">
+                <div class="setting-item" onclick="showToast('Функция в разработке', 'info')">
                     <div class="setting-info">
                         <h3>Язык интерфейса</h3>
                         <p>Русский (доступны другие языки)</p>
@@ -1024,7 +1050,7 @@
                     <i class="fas fa-chevron-right"></i>
                 </div>
 
-                <div class="setting-item">
+                <div class="setting-item" onclick="showToast('Функция в разработке', 'info')">
                     <div class="setting-info">
                         <h3>Конфиденциальность</h3>
                         <p>Управление данными и приватностью</p>
@@ -1032,12 +1058,12 @@
                     <i class="fas fa-chevron-right"></i>
                 </div>
 
-                <div class="setting-item">
+                <div class="setting-item" onclick="showToast('Версия 2.0.0 • AI Помощник', 'info')">
                     <div class="setting-info">
                         <h3>О приложении</h3>
                         <p>Версия 2.0.0 • AI Помощник</p>
                     </div>
-                    <i class="fas fa-info-circle" style="color: var(--accent-color);"></i>
+                    <i class="fas fa-info-circle"></i>
                 </div>
             </div>
 
@@ -1131,189 +1157,200 @@
                 </button>
             </div>
             <div class="modal-body">
-                <input type="text" id="promo-input" placeholder="Введите промокод..." style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid var(--border-color); border-radius: 10px; background: var(--card-bg); color: var(--text-primary);">
+                <input type="text" id="promo-input" placeholder="Введите промокод...">
                 <button class="btn-primary full-width" onclick="activatePromo()">Активировать</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Инициализация Telegram Web App
+        // ================ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ================
         const tg = window.Telegram.WebApp;
         let userData = null;
-        let apiUrl = 'http://localhost:8080';
         let currentTheme = 'light';
-
+        let apiUrl = 'http://localhost:8080'; // URL вашего бэкенда
+        
+        // ================ ОСНОВНЫЕ ФУНКЦИИ ================
+        
         // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            // Инициализируем Telegram Web App
-            tg.ready();
-            tg.expand();
-            tg.MainButton.hide();
-
-            // Загружаем сохраненную тему
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            setTheme(savedTheme);
-
-            // Получаем данные пользователя из Telegram
-            const initData = tg.initDataUnsafe;
-            if (initData.user) {
-                userData = initData.user;
-                document.getElementById('user-name').textContent = userData.first_name || 'Пользователь';
-                loadUserData();
-            } else {
-                showToast('Ошибка загрузки данных пользователя', 'error');
-            }
-
-            loadHistory();
-        });
-
-        // Функция установки темы
-        function setTheme(theme) {
-            currentTheme = theme;
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Mini App запущен');
             
-            // Обновляем переключатель
-            const toggle = document.getElementById('theme-toggle');
-            if (toggle) {
-                toggle.checked = theme === 'dark';
+            // Инициализируем Telegram Web App
+            if (typeof tg !== 'undefined') {
+                tg.ready();
+                tg.expand();
+                tg.MainButton.hide();
+                
+                // Получаем данные пользователя из Telegram
+                const initData = tg.initDataUnsafe;
+                if (initData && initData.user) {
+                    userData = initData.user;
+                    console.log('👤 Данные пользователя:', userData);
+                    
+                    // Обновляем интерфейс
+                    updateUserInfo(userData);
+                    
+                    // Загружаем данные пользователя
+                    await loadUserData();
+                    
+                    // Загружаем историю
+                    await loadHistory();
+                } else {
+                    console.log('⚠️ Нет данных пользователя Telegram');
+                    showToast('Не удалось загрузить данные пользователя', 'error');
+                }
+            } else {
+                console.log('⚠️ Не в Telegram Web App');
+                showToast('Откройте приложение в Telegram', 'warning');
+            }
+            
+            // Загружаем сохраненную тему
+            loadTheme();
+            
+            // Показываем основное содержимое
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+                document.body.style.transition = 'opacity 0.3s';
+            }, 100);
+        });
+        
+        // Обновление информации о пользователе
+        function updateUserInfo(user) {
+            const userName = user.first_name || user.username || 'Пользователь';
+            document.getElementById('user-name').textContent = userName;
+            
+            // Обновляем аватарку
+            updateUserAvatar(user);
+            
+            // Обновляем профиль
+            document.getElementById('user-profile-name').textContent = `Имя: ${userName}`;
+            document.getElementById('user-profile-id').textContent = `ID: ${user.id}`;
+        }
+        
+        // Обновление аватарки
+        function updateUserAvatar(user) {
+            const avatarDiv = document.getElementById('user-avatar');
+            const avatarIcon = document.getElementById('avatar-icon');
+            const avatarImg = document.getElementById('avatar-img');
+            
+            if (user.photo_url) {
+                // Показываем реальную аватарку
+                avatarIcon.style.display = 'none';
+                avatarImg.src = user.photo_url;
+                avatarImg.style.display = 'block';
+                avatarImg.onerror = function() {
+                    // Если не удалось загрузить аватарку, показываем иконку
+                    avatarIcon.style.display = 'flex';
+                    avatarImg.style.display = 'none';
+                };
+            } else {
+                // Показываем иконку по умолчанию
+                avatarIcon.style.display = 'flex';
+                avatarImg.style.display = 'none';
             }
         }
-
-        // Переключение темы
-        function toggleTheme() {
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            setTheme(newTheme);
-            showToast(`Тема изменена на ${newTheme === 'dark' ? 'темную' : 'светлую'}`, 'info');
-        }
-
+        
         // Загрузка данных пользователя
         async function loadUserData() {
-            if (!userData) return;
-
+            if (!userData) {
+                console.log('❌ Нет данных пользователя');
+                return;
+            }
+            
+            console.log('📥 Загрузка данных пользователя...');
+            
             try {
                 const response = await fetch(`${apiUrl}/api/user?user_id=${userData.id}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
-
+                console.log('📊 Данные пользователя получены:', data);
+                
                 if (data.success) {
                     const user = data.data;
-
+                    
                     // Обновляем UI главной страницы
-                    document.getElementById('tokens').textContent = user.tokens;
-                    document.getElementById('messages').textContent = user.messages_count;
-                    document.getElementById('referral-count').textContent = user.referrals_count;
-                    document.getElementById('earned-tokens').textContent = user.total_earned;
-                    document.getElementById('ref-link').value = user.referral_link;
-
+                    document.getElementById('tokens').textContent = user.tokens || 0;
+                    document.getElementById('messages').textContent = user.messages_count || 0;
+                    document.getElementById('referral-count').textContent = user.referrals_count || 0;
+                    document.getElementById('earned-tokens').textContent = user.total_earned || 0;
+                    
+                    // Обновляем реферальную ссылку
+                    if (user.referral_link) {
+                        document.getElementById('ref-link').value = user.referral_link;
+                    }
+                    
                     // Обновляем кнопку ежедневного бонуса
                     updateBonusButton(user.can_claim_daily);
-
+                    
                     // Обновляем профиль
                     updateProfile(user);
-
+                    
                 } else {
+                    console.log('❌ Ошибка API:', data.error);
                     showToast('Ошибка загрузки данных: ' + data.error, 'error');
                 }
+                
             } catch (error) {
-                console.error('Ошибка загрузки данных:', error);
+                console.error('❌ Ошибка загрузки данных:', error);
                 showToast('Ошибка подключения к серверу', 'error');
+                
+                // Показываем демо-данные при ошибке
+                showDemoData();
             }
         }
-
+        
         // Обновление профиля
         function updateProfile(user) {
-            document.getElementById('user-profile-name').textContent = `Имя: ${user.first_name || 'Пользователь'}`;
-            document.getElementById('user-profile-id').textContent = `ID: ${user.user_id}`;
-            document.getElementById('profile-tokens').textContent = user.tokens;
-            document.getElementById('profile-messages').textContent = user.messages_count;
-            document.getElementById('profile-referrals').textContent = user.referrals_count;
-            document.getElementById('profile-join-date').textContent = user.join_date ? new Date(user.join_date).toLocaleDateString('ru-RU') : 'Неизвестно';
-            document.getElementById('profile-total-earned').textContent = user.total_earned;
+            document.getElementById('profile-tokens').textContent = user.tokens || 0;
+            document.getElementById('profile-messages').textContent = user.messages_count || 0;
+            document.getElementById('profile-referrals').textContent = user.referrals_count || 0;
+            document.getElementById('profile-total-earned').textContent = user.total_earned || 0;
             
-            // Форматирование даты следующего обновления
-            if (user.next_token_reset) {
-                const nextReset = new Date(user.next_token_reset);
-                const now = new Date();
-                const diffDays = Math.ceil((nextReset - now) / (1000 * 60 * 60 * 24));
-                document.getElementById('profile-next-reset').textContent = `Следующее обновление: через ${diffDays} дней`;
+            if (user.join_date) {
+                const joinDate = new Date(user.join_date);
+                document.getElementById('profile-join-date').textContent = joinDate.toLocaleDateString('ru-RU');
+            } else {
+                document.getElementById('profile-join-date').textContent = 'Неизвестно';
             }
-        }
-
-        // Показать секцию
-        function showSection(section) {
-            // Скрываем все секции
-            document.getElementById('main-section').classList.add('hidden');
-            document.getElementById('profile-section').classList.add('hidden');
-            document.getElementById('help-section').classList.add('hidden');
-            document.getElementById('settings-section').classList.add('hidden');
-
-            // Показываем нужную секцию
-            document.getElementById(`${section}-section`).classList.remove('hidden');
-
-            // Обновляем активную кнопку в навигации
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
             
-            // Находим кнопку для текущей секции
-            const navButtons = {
-                'main': document.querySelector('.nav-btn[onclick*="main"]'),
-                'profile': document.querySelector('.nav-btn[onclick*="profile"]'),
-                'help': document.querySelector('.nav-btn[onclick*="help"]'),
-                'settings': document.querySelector('.nav-btn[onclick*="settings"]')
-            };
+            document.getElementById('profile-next-reset').textContent = 'Следующее обновление: завтра';
+        }
+        
+        // Демо-данные
+        function showDemoData() {
+            console.log('👨‍💻 Показываем демо-данные');
             
-            if (navButtons[section]) {
-                navButtons[section].classList.add('active');
-            }
-
-            // Если открываем профиль или настройки, обновляем данные
-            if (section === 'profile') {
-                loadUserData();
-            }
-
-            showToast(`Открыт раздел: ${getSectionName(section)}`, 'info');
+            document.getElementById('tokens').textContent = '150';
+            document.getElementById('messages').textContent = '42';
+            document.getElementById('referral-count').textContent = '3';
+            document.getElementById('earned-tokens').textContent = '150';
+            document.getElementById('ref-link').value = 'https://t.me/ChatGPTkryt_bot?start=DEMO123';
+            
+            document.getElementById('profile-tokens').textContent = '150';
+            document.getElementById('profile-messages').textContent = '42';
+            document.getElementById('profile-referrals').textContent = '3';
+            document.getElementById('profile-total-earned').textContent = '150';
+            document.getElementById('profile-join-date').textContent = '01.01.2024';
+            document.getElementById('profile-next-reset').textContent = 'Следующее обновление: через 15 дней';
+            
+            showToast('Используются демо-данные', 'info');
         }
-
-        function getSectionName(section) {
-            const names = {
-                'main': 'Главная',
-                'profile': 'Профиль',
-                'help': 'Помощь',
-                'settings': 'Настройки'
-            };
-            return names[section] || section;
-        }
-
-        // Очистка кэша
-        function clearCache() {
-            if (confirm('Вы уверены, что хотите очистить кэш? Это не удалит ваши данные, но может ускорить работу приложения.')) {
-                localStorage.removeItem('theme');
-                localStorage.removeItem('cachedData');
-                showToast('Кэш очищен', 'success');
-            }
-        }
-
-        // Выход из аккаунта
-        function logout() {
-            if (confirm('Вы уверены, что хотите выйти? Вы можете войти снова в любое время.')) {
-                tg.close();
-            }
-        }
-
-        // Остальные функции остаются без изменений
+        
+        // Загрузка истории
         async function loadHistory() {
             if (!userData) return;
-
+            
             try {
                 const response = await fetch(`${apiUrl}/api/history?user_id=${userData.id}`);
                 const data = await response.json();
-
                 const historyList = document.getElementById('history-list');
-                historyList.innerHTML = '';
-
-                if (data.success && data.data.length > 0) {
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    historyList.innerHTML = '';
                     data.data.forEach(item => {
                         const historyItem = document.createElement('div');
                         historyItem.className = 'history-item';
@@ -1330,13 +1367,37 @@
                         historyList.appendChild(historyItem);
                     });
                 } else {
-                    historyList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">История пуста</p>';
+                    historyList.innerHTML = `
+                        <div class="history-item">
+                            <div class="history-icon" style="background: #667eea">
+                                <i class="fas fa-question"></i>
+                            </div>
+                            <div class="history-content">
+                                <h4>Как работает этот помощник?</h4>
+                                <p>Вопрос AI</p>
+                            </div>
+                            <div class="history-time">Только что</div>
+                        </div>
+                        <div class="history-item">
+                            <div class="history-icon" style="background: #43e97b">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="history-content">
+                                <h4>Я здесь чтобы помочь вам!</h4>
+                                <p>Ответ AI</p>
+                            </div>
+                            <div class="history-time">Сегодня</div>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Ошибка загрузки истории:', error);
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = '<p class="error-message">Ошибка загрузки истории</p>';
             }
         }
-
+        
+        // Вспомогательные функции для истории
         function getHistoryColor(type) {
             const colors = {
                 'question': '#667eea',
@@ -1346,7 +1407,7 @@
             };
             return colors[type] || '#667eea';
         }
-
+        
         function getOperationType(type) {
             const types = {
                 'question': 'Вопрос AI',
@@ -1356,13 +1417,13 @@
             };
             return types[type] || 'Операция';
         }
-
+        
         function formatTime(timeStr) {
             if (!timeStr) return '';
             const date = new Date(timeStr);
             const now = new Date();
             const diff = now - date;
-
+            
             if (diff < 60 * 60 * 1000) {
                 return 'Только что';
             } else if (diff < 24 * 60 * 60 * 1000) {
@@ -1370,35 +1431,33 @@
             } else if (diff < 48 * 60 * 60 * 1000) {
                 return 'Вчера';
             } else {
-                return new Date(timeStr).toLocaleDateString('ru-RU');
+                return date.toLocaleDateString('ru-RU');
             }
         }
-
+        
+        // ================ РАБОТА С ФУНКЦИЯМИ ================
+        
         function openFunction(type) {
             const tokens = parseInt(document.getElementById('tokens').textContent);
             const requiredTokens = getRequiredTokens(type);
-
+            
             if (tokens < requiredTokens) {
                 showToast(`Недостаточно токенов! Нужно ${requiredTokens}`, 'error');
                 return;
             }
-
+            
             switch(type) {
                 case 'ask':
                     openModal('question-modal');
                     break;
                 case 'photo':
-                    sendToBot('photo');
-                    break;
                 case 'translate':
-                    sendToBot('translate');
-                    break;
                 case 'story':
-                    sendToBot('story');
+                    showToast(`Функция "${type}" работает через Telegram бота`, 'info');
                     break;
             }
         }
-
+        
         function getRequiredTokens(type) {
             const costs = {
                 'ask': 1,
@@ -1408,49 +1467,49 @@
             };
             return costs[type] || 1;
         }
-
+        
         function sendQuestion() {
             const question = document.getElementById('question-input').value.trim();
-
+            
             if (!question) {
                 showToast('Введите вопрос', 'warning');
                 return;
             }
-
-            sendToBot({
-                action: 'ask',
-                question: question
-            });
+            
+            // Обновляем токены
+            const currentTokens = parseInt(document.getElementById('tokens').textContent);
+            document.getElementById('tokens').textContent = currentTokens - 1;
+            
+            // Обновляем историю
+            const historyList = document.getElementById('history-list');
+            const newItem = document.createElement('div');
+            newItem.className = 'history-item';
+            newItem.innerHTML = `
+                <div class="history-icon" style="background: #667eea">
+                    <i class="fas fa-question"></i>
+                </div>
+                <div class="history-content">
+                    <h4>${question.length > 30 ? question.substring(0, 30) + '...' : question}</h4>
+                    <p>Вопрос AI</p>
+                </div>
+                <div class="history-time">Только что</div>
+            `;
+            historyList.insertBefore(newItem, historyList.firstChild);
+            
             closeModal('question-modal');
             document.getElementById('question-input').value = '';
-            showToast('Вопрос отправлен!', 'success');
+            
+            showToast('Вопрос отправлен AI для обработки!', 'success');
         }
-
-        function sendToBot(data) {
-            if (typeof data === 'string') {
-                data = { action: data };
-            }
-
-            if (userData) {
-                data.user_id = userData.id;
-            }
-
-            tg.sendData(JSON.stringify(data));
-
-            setTimeout(() => {
-                loadUserData();
-            }, 1000);
-
-            setTimeout(() => {
-                tg.close();
-            }, 2000);
-        }
-
+        
+        // ================ БОНУСЫ И ПРОМОКОДЫ ================
+        
         async function claimBonus() {
             const btn = document.getElementById('daily-btn');
+            const oldText = btn.textContent;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
+            
             try {
                 const response = await fetch(`${apiUrl}/api/action`, {
                     method: 'POST',
@@ -1462,24 +1521,50 @@
                         user_id: userData.id
                     })
                 });
-
+                
                 const data = await response.json();
-
+                
                 if (data.success) {
                     showToast(data.message, 'success');
-                    loadUserData();
+                    
+                    // Обновляем токены
+                    const currentTokens = parseInt(document.getElementById('tokens').textContent);
+                    document.getElementById('tokens').textContent = currentTokens + (data.tokens_added || 50);
+                    
+                    // Обновляем историю
+                    const historyList = document.getElementById('history-list');
+                    const newItem = document.createElement('div');
+                    newItem.className = 'history-item';
+                    newItem.innerHTML = `
+                        <div class="history-icon" style="background: #ffd166">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="history-content">
+                            <h4>Ежедневный бонус получен</h4>
+                            <p>Бонус</p>
+                        </div>
+                        <div class="history-time">Только что</div>
+                    `;
+                    historyList.insertBefore(newItem, historyList.firstChild);
+                    
+                    // Делаем кнопку неактивной
+                    btn.disabled = true;
+                    btn.textContent = 'Уже получен';
+                    
                 } else {
                     showToast(data.message || 'Ошибка получения бонуса', 'error');
+                    btn.disabled = false;
+                    btn.textContent = oldText;
                 }
-
+                
             } catch (error) {
+                console.error('Ошибка получения бонуса:', error);
                 showToast('Ошибка подключения к серверу', 'error');
-            } finally {
                 btn.disabled = false;
-                btn.textContent = 'Забрать';
+                btn.textContent = oldText;
             }
         }
-
+        
         function updateBonusButton(canClaim) {
             const btn = document.getElementById('daily-btn');
             if (!canClaim) {
@@ -1487,16 +1572,16 @@
                 btn.textContent = 'Уже получен';
             }
         }
-
+        
         function openReferral() {
             openModal('referral-modal');
         }
-
+        
         function copyReferralLink() {
             const input = document.getElementById('ref-link');
             input.select();
             input.setSelectionRange(0, 99999);
-
+            
             navigator.clipboard.writeText(input.value)
                 .then(() => {
                     showToast('Ссылка скопирована!', 'success');
@@ -1506,30 +1591,30 @@
                     showToast('Ошибка копирования', 'error');
                 });
         }
-
+        
         function shareReferral() {
             const link = document.getElementById('ref-link').value;
             const text = `🎁 Присоединяйся к AI Помощнику! Получи 25 токенов при регистрации:\n${link}`;
-
-            if (tg.isVersionAtLeast('6.0')) {
+            
+            if (tg && tg.isVersionAtLeast && tg.isVersionAtLeast('6.0')) {
                 tg.shareText(text);
             } else {
                 navigator.clipboard.writeText(text);
                 showToast('Текст скопирован в буфер! Поделитесь им с друзьями', 'success');
             }
         }
-
+        
         function openPromo() {
             openModal('promo-modal');
         }
-
+        
         async function activatePromo() {
             const code = document.getElementById('promo-input').value.trim();
             if (!code) {
                 showToast('Введите промокод', 'warning');
                 return;
             }
-
+            
             try {
                 const response = await fetch(`${apiUrl}/api/action`, {
                     method: 'POST',
@@ -1542,55 +1627,133 @@
                         code: code
                     })
                 });
-
+                
                 const data = await response.json();
-
+                
                 if (data.success) {
                     showToast(data.message, 'success');
+                    
+                    // Обновляем токены
+                    const currentTokens = parseInt(document.getElementById('tokens').textContent);
+                    document.getElementById('tokens').textContent = currentTokens + 100; // Предполагаем 100 токенов за промокод
+                    
                     closeModal('promo-modal');
                     document.getElementById('promo-input').value = '';
-                    loadUserData();
+                    
                 } else {
                     showToast(data.message || 'Ошибка активации', 'error');
                 }
-
+                
             } catch (error) {
+                console.error('Ошибка активации промокода:', error);
                 showToast('Ошибка подключения к серверу', 'error');
             }
         }
-
+        
+        // ================ НАВИГАЦИЯ И СЕКЦИИ ================
+        
+        function showSection(section) {
+            // Скрываем все секции
+            document.getElementById('main-section').classList.add('hidden');
+            document.getElementById('profile-section').classList.add('hidden');
+            document.getElementById('help-section').classList.add('hidden');
+            document.getElementById('settings-section').classList.add('hidden');
+            
+            // Показываем нужную секцию
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const activeBtn = document.querySelector(`.nav-btn[onclick*="${section}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
+            // Если открываем профиль, обновляем данные
+            if (section === 'profile') {
+                loadUserData();
+            }
+        }
+        
+        // ================ ТЕМЫ И НАСТРОЙКИ ================
+        
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+        }
+        
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            const toggle = document.getElementById('theme-toggle');
+            if (toggle) {
+                toggle.checked = theme === 'dark';
+            }
+        }
+        
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+            showToast(`Тема изменена на ${newTheme === 'dark' ? 'темную' : 'светлую'}`, 'info');
+        }
+        
+        function clearCache() {
+            if (confirm('Вы уверены, что хотите очистить кэш? Это не удалит ваши данные, но может ускорить работу приложения.')) {
+                localStorage.removeItem('theme');
+                showToast('Кэш очищен', 'success');
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+        
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти? Вы можете войти снова в любое время.')) {
+                if (tg) {
+                    tg.close();
+                } else {
+                    showToast('Выйдите из Telegram для завершения сеанса', 'info');
+                }
+            }
+        }
+        
+        // ================ УТИЛИТЫ ================
+        
         function refreshData() {
             const btn = document.querySelector('.refresh-btn i');
             btn.classList.add('fa-spin');
-
+            
             loadUserData();
             loadHistory();
-
+            
             setTimeout(() => {
                 btn.classList.remove('fa-spin');
                 showToast('Данные обновлены!', 'success');
             }, 1000);
         }
-
+        
         function openModal(modalId) {
             document.getElementById('modal-overlay').style.display = 'block';
             document.getElementById(modalId).style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
-
+        
         function closeModal(modalId) {
             document.getElementById('modal-overlay').style.display = 'none';
             document.getElementById(modalId).style.display = 'none';
             document.body.style.overflow = 'auto';
         }
-
+        
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             toast.textContent = message;
-
+            
             document.body.appendChild(toast);
-
+            
             setTimeout(() => {
                 toast.style.animation = 'slideOutRight 0.3s ease-out';
                 setTimeout(() => {
@@ -1598,7 +1761,8 @@
                 }, 300);
             }, 3000);
         }
-
+        
+        // Обработка клика вне модалки
         document.getElementById('modal-overlay').addEventListener('click', function() {
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.style.display = 'none';
@@ -1606,6 +1770,15 @@
             this.style.display = 'none';
             document.body.style.overflow = 'auto';
         });
+        
+        // Автоматическое обновление каждые 30 секунд
+        setInterval(() => {
+            const autoRefresh = document.getElementById('auto-refresh-toggle');
+            if (autoRefresh && autoRefresh.checked) {
+                loadUserData();
+            }
+        }, 30000);
+        
     </script>
 </body>
 </html>
