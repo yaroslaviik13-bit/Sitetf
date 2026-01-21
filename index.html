@@ -575,7 +575,7 @@
             transform: rotate(90deg);
         }
 
-        .modal-body textarea, .modal-body input {
+        .modal-body textarea, .modal-body input, .modal-body select {
             width: 100%;
             padding: 15px;
             border: 2px solid var(--border-color);
@@ -592,7 +592,7 @@
             resize: none;
         }
 
-        .modal-body textarea:focus, .modal-body input:focus {
+        .modal-body textarea:focus, .modal-body input:focus, .modal-body select:focus {
             outline: none;
             border-color: var(--accent-color);
         }
@@ -1116,6 +1116,73 @@
             </div>
         </div>
 
+        <div class="modal" id="photo-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-camera"></i> Решить по фото</h3>
+                <button class="close-modal" onclick="closeModal('photo-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Отправьте фото с задачей в чат с ботом.</p>
+                <p>Стоимость: 3 токена</p>
+                <button class="btn-primary full-width" onclick="openChatForPhoto()">
+                    <i class="fas fa-paper-plane"></i> Открыть чат с ботом
+                </button>
+            </div>
+        </div>
+
+        <div class="modal" id="translate-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-language"></i> Переводчик</h3>
+                <button class="close-modal" onclick="closeModal('translate-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <select id="source-lang" class="full-width">
+                    <option value="auto">Автоопределение</option>
+                    <option value="ru">Русский</option>
+                    <option value="en">Английский</option>
+                    <option value="de">Немецкий</option>
+                    <option value="fr">Французский</option>
+                    <option value="es">Испанский</option>
+                </select>
+                <select id="target-lang" class="full-width">
+                    <option value="ru">Русский</option>
+                    <option value="en">Английский</option>
+                    <option value="de">Немецкий</option>
+                    <option value="fr">Французский</option>
+                    <option value="es">Испанский</option>
+                </select>
+                <textarea id="translate-input" placeholder="Введите текст для перевода..."></textarea>
+                <button class="btn-primary full-width" onclick="sendTranslation()">Перевести</button>
+            </div>
+        </div>
+
+        <div class="modal" id="story-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-book"></i> Создать историю</h3>
+                <button class="close-modal" onclick="closeModal('story-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="number" id="story-words" placeholder="Количество слов (100-5000)" min="100" max="5000" value="500">
+                <select id="story-genre" class="full-width">
+                    <option value="фэнтези">Фэнтези</option>
+                    <option value="научная фантастика">Научная фантастика</option>
+                    <option value="детектив">Детектив</option>
+                    <option value="романтика">Романтика</option>
+                    <option value="комедия">Комедия</option>
+                    <option value="хоррор">Хоррор</option>
+                    <option value="приключения">Приключения</option>
+                </select>
+                <textarea id="story-prompt" placeholder="Опишите вашу историю или тему..."></textarea>
+                <button class="btn-primary full-width" onclick="sendStoryRequest()">Создать историю</button>
+            </div>
+        </div>
+
         <div class="modal" id="referral-modal">
             <div class="modal-header">
                 <h3><i class="fas fa-user-plus"></i> Реферальная система</h3>
@@ -1168,7 +1235,12 @@
         const tg = window.Telegram.WebApp;
         let userData = null;
         let currentTheme = 'light';
-        let apiUrl = 'http://localhost:8080'; // URL вашего бэкенда
+        
+        // Если Mini App запущен на GitHub Pages, используем другой URL для API
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        let apiUrl = isGitHubPages 
+            ? 'https://ваш-домен.com/api'  // ЗАМЕНИТЕ на реальный домен вашего бота
+            : 'http://localhost:8080';
         
         // ================ ОСНОВНЫЕ ФУНКЦИИ ================
         
@@ -1203,6 +1275,15 @@
             } else {
                 console.log('⚠️ Не в Telegram Web App');
                 showToast('Откройте приложение в Telegram', 'warning');
+                
+                // Тестовые данные для разработки
+                userData = {
+                    id: 123456789,
+                    first_name: 'Тестовый',
+                    username: 'test_user'
+                };
+                updateUserInfo(userData);
+                showDemoData();
             }
             
             // Загружаем сохраненную тему
@@ -1451,9 +1532,13 @@
                     openModal('question-modal');
                     break;
                 case 'photo':
+                    openModal('photo-modal');
+                    break;
                 case 'translate':
+                    openModal('translate-modal');
+                    break;
                 case 'story':
-                    showToast(`Функция "${type}" работает через Telegram бота`, 'info');
+                    openModal('story-modal');
                     break;
             }
         }
@@ -1476,30 +1561,121 @@
                 return;
             }
             
-            // Обновляем токены
-            const currentTokens = parseInt(document.getElementById('tokens').textContent);
-            document.getElementById('tokens').textContent = currentTokens - 1;
+            // Отправляем в чат с ботом через Web App
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({
+                    action: 'question',
+                    text: question
+                }));
+                
+                // Обновляем токены
+                const currentTokens = parseInt(document.getElementById('tokens').textContent);
+                document.getElementById('tokens').textContent = currentTokens - 1;
+                
+                // Обновляем историю
+                const historyList = document.getElementById('history-list');
+                const newItem = document.createElement('div');
+                newItem.className = 'history-item';
+                newItem.innerHTML = `
+                    <div class="history-icon" style="background: #667eea">
+                        <i class="fas fa-question"></i>
+                    </div>
+                    <div class="history-content">
+                        <h4>${question.length > 30 ? question.substring(0, 30) + '...' : question}</h4>
+                        <p>Вопрос AI</p>
+                    </div>
+                    <div class="history-time">Только что</div>
+                `;
+                historyList.insertBefore(newItem, historyList.firstChild);
+                
+                closeModal('question-modal');
+                document.getElementById('question-input').value = '';
+                
+                showToast('Вопрос отправлен AI для обработки!', 'success');
+            } else {
+                showToast('Откройте чат с ботом для отправки вопроса', 'info');
+            }
+        }
+        
+        function openChatForPhoto() {
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({
+                    action: 'photo',
+                    message: 'Открыто меню загрузки фото'
+                }));
+                showToast('Отправьте фото в чат с ботом', 'info');
+            } else {
+                showToast('Откройте чат с ботом для отправки фото', 'info');
+            }
+        }
+        
+        async function sendTranslation() {
+            const text = document.getElementById('translate-input').value.trim();
+            const sourceLang = document.getElementById('source-lang').value;
+            const targetLang = document.getElementById('target-lang').value;
             
-            // Обновляем историю
-            const historyList = document.getElementById('history-list');
-            const newItem = document.createElement('div');
-            newItem.className = 'history-item';
-            newItem.innerHTML = `
-                <div class="history-icon" style="background: #667eea">
-                    <i class="fas fa-question"></i>
-                </div>
-                <div class="history-content">
-                    <h4>${question.length > 30 ? question.substring(0, 30) + '...' : question}</h4>
-                    <p>Вопрос AI</p>
-                </div>
-                <div class="history-time">Только что</div>
-            `;
-            historyList.insertBefore(newItem, historyList.firstChild);
+            if (!text) {
+                showToast('Введите текст для перевода', 'warning');
+                return;
+            }
             
-            closeModal('question-modal');
-            document.getElementById('question-input').value = '';
+            // Отправляем в чат с ботом
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({
+                    action: 'translate',
+                    text: text,
+                    source: sourceLang,
+                    target: targetLang
+                }));
+                
+                // Обновляем токены
+                const currentTokens = parseInt(document.getElementById('tokens').textContent);
+                document.getElementById('tokens').textContent = currentTokens - 1;
+                
+                closeModal('translate-modal');
+                document.getElementById('translate-input').value = '';
+                
+                showToast('Текст отправлен на перевод в чат', 'success');
+            } else {
+                showToast('Откройте чат с ботом для перевода', 'info');
+            }
+        }
+        
+        async function sendStoryRequest() {
+            const words = document.getElementById('story-words').value;
+            const genre = document.getElementById('story-genre').value;
+            const prompt = document.getElementById('story-prompt').value.trim();
             
-            showToast('Вопрос отправлен AI для обработки!', 'success');
+            if (!prompt) {
+                showToast('Опишите вашу историю', 'warning');
+                return;
+            }
+            
+            if (words < 100 || words > 5000) {
+                showToast('Количество слов должно быть от 100 до 5000', 'error');
+                return;
+            }
+            
+            // Отправляем в чат с ботом
+            if (tg && tg.sendData) {
+                const fullPrompt = `Создай историю в жанре ${genre}. Длина: ${words} слов. Тема: ${prompt}`;
+                
+                tg.sendData(JSON.stringify({
+                    action: 'story',
+                    text: fullPrompt
+                }));
+                
+                // Обновляем токены
+                const currentTokens = parseInt(document.getElementById('tokens').textContent);
+                document.getElementById('tokens').textContent = currentTokens - 5;
+                
+                closeModal('story-modal');
+                document.getElementById('story-prompt').value = '';
+                
+                showToast('Запрос на создание истории отправлен в чат', 'success');
+            } else {
+                showToast('Откройте чат с ботом для создания истории', 'info');
+            }
         }
         
         // ================ БОНУСЫ И ПРОМОКОДЫ ================
@@ -1633,9 +1809,9 @@
                 if (data.success) {
                     showToast(data.message, 'success');
                     
-                    // Обновляем токены
+                    // Обновляем токены (предполагаем 100 токенов за промокод)
                     const currentTokens = parseInt(document.getElementById('tokens').textContent);
-                    document.getElementById('tokens').textContent = currentTokens + 100; // Предполагаем 100 токенов за промокод
+                    document.getElementById('tokens').textContent = currentTokens + 100;
                     
                     closeModal('promo-modal');
                     document.getElementById('promo-input').value = '';
